@@ -9,8 +9,255 @@ import java.util.*;
  */
 public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>, IGraph<V, E> {
 
-    // TODO: Implement this type
+    private Set<V> allVer = new HashSet<>();
+    private Set<E> allEdg = new HashSet<>();
+    /**
+     * Add a vertex to the graph
+     *
+     * @param v vertex to add
+     * @return true if the vertex was added successfully and false otherwise
+     */
+    @Override
+    public boolean addVertex(V v) {
+        this.allVer.add(v);
+        return this.allVer.contains(v);
+    }
 
+    /**
+     * Check if a vertex is part of the graph
+     *
+     * @param v vertex to check in the graph
+     * @return true of v is part of the graph and false otherwise
+     */
+    @Override
+    public boolean vertex(V v) {
+        return this.allVer.contains(v);
+    }
+
+    /**
+     * Add an edge of the graph
+     *
+     * @param e the edge to add to the graph
+     * @return true if the edge was successfully added and false otherwise
+     */
+    @Override
+    public boolean addEdge(E e) {
+        this.allEdg.add(e);
+        return this.allEdg.contains(e);
+    }
+
+    /**
+     * Check if an edge is part of the graph
+     *
+     * @param e the edge to check in the graph
+     * @return true if e is an edge in the graoh and false otherwise
+     */
+    @Override
+    public boolean edge(E e) {
+        return this.allEdg.contains(e);
+    }
+
+    /**
+     * Check if v1-v2 is an edge in the graph
+     *
+     * @param v1 the first vertex of the edge
+     * @param v2 the second vertex of the edge
+     * @return true of the v1-v2 edge is part of the graph and false otherwise
+     */
+    @Override
+    public boolean edge(V v1, V v2) {
+        Edge<V> Ed=new Edge<>(v1,v2);
+        return this.allEdg.contains(Ed);
+    }
+
+    /**
+     * Determine the length on an edge in the graph
+     *
+     * @param v1 the first vertex of the edge
+     * @param v2 the second vertex of the edge
+     * @return the length of the v1-v2 edge if this edge is part of the graph
+     */
+    @Override
+    public int edgeLength(V v1, V v2) {
+        Edge<V> toEd=new Edge<>(v1,v2);
+
+        for(E edge: this.allEdg){
+            if(edge.equals(toEd)){
+                return edge.length();
+            }
+        }
+        throw new IllegalArgumentException("Edge is not in this graph");
+    }
+
+    /**
+     * Obtain the sum of the lengths of all edges in the graph
+     *
+     * @return the sum of the lengths of all edges in the graph
+     */
+    @Override
+    public int edgeLengthSum() {
+        int sum=0;
+        for(E edge: this.allEdg){
+            sum+=edge.length();
+        }
+        return sum;
+
+    }
+
+    /**
+     * Remove an edge from the graph
+     *
+     * @param e the edge to remove
+     * @return true if e was successfully removed and false otherwise
+     */
+    @Override
+    public boolean remove(E e) {
+        if (this.allEdg.contains(e)){
+            this.allEdg.remove(e);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    /**
+     * Remove a vertex from the graph
+     *
+     * @param v the vertex to remove
+     * @return true if v was successfully removed and false otherwise
+     */
+    @Override
+    public boolean remove(V v) {
+        if (this.allVer.contains(v)){
+            this.allVer.remove(v);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    /**
+     * Obtain a set of all vertices in the graph.
+     * Access to this set **should not** permit graph mutations.
+     *
+     * @return a set of all vertices in the graph
+     */
+    @Override
+    public Set<V> allVertices() {
+        return this.allVer;
+    }
+
+    /**
+     * Obtain a set of all vertices incident on v.
+     * Access to this set **should not** permit graph mutations.
+     *
+     * @param v the vertex of interest
+     * @return all edges incident on v
+     */
+    @Override
+    public Set<E> allEdges(V v) {
+        return this.allEdg;
+    }
+
+    /**
+     * Obtain a set of all edges in the graph.
+     * Access to this set **should not** permit graph mutations.
+     *
+     * @return all edges in the graph
+     */
+    @Override
+    public Set<E> allEdges() {
+        return this.allEdg;
+    }
+
+    /**
+     * Obtain all the neighbours of vertex v.
+     * Access to this map **should not** permit graph mutations.
+     *
+     * @param v is the vertex whose neighbourhood we want.
+     * @return a map containing each vertex w that neighbors v and the edge between v and w.
+     */
+    @Override
+    public Map<V, E> getNeighbours(V v) {
+        return null;
+    }
+
+    /**
+     * Compute the shortest path from source to sink
+     *
+     * @param source the start vertex
+     * @param sink   the end vertex
+     * @return the vertices, in order, on the shortest path from source to sink (both end points are part of the list)
+     */
+    @Override
+    public List<V> shortestPath(V source, V sink) {
+        return null;
+    }
+
+    /**
+     * Compute the minimum spanning tree of the graph.
+     * See https://en.wikipedia.org/wiki/Minimum_spanning_tree
+     *
+     * @return a list of edges that forms a minimum spanning tree of the graph
+     */
+    @Override
+    public List<E> minimumSpanningTree() {
+        return null;
+    }
+
+    /**
+     * Compute the length of a given path
+     *
+     * @param path indicates the vertices on the given path
+     * @return the length of path
+     */
+
+    @Override
+    public int pathLength(List<V> path) {
+        return 0;
+    }
+
+    /**
+     * Obtain all vertices w that are no more than a <em>path distance</em> of range from v.
+     *
+     * @param v     the vertex to start the search from.
+     * @param range the radius of the search.
+     * @return a set of vertices that are within range of v (this set does not contain v).
+     */
+    @Override
+    public Set<V> search(V v, int range) {
+        return null;
+    }
+
+    /**
+     * Compute the diameter of the graph.
+     * <ul>
+     * <li>The diameter of a graph is the length of the longest shortest path in the graph.</li>
+     * <li>If a graph has multiple components then we will define the diameter
+     * as the diameter of the largest component.</li>
+     * </ul>
+     *
+     * @return the diameter of the graph.
+     */
+    @Override
+    public int diameter() {
+        return 0;
+    }
+
+    /**
+     * Find the edge that connects two vertices if such an edge exists.
+     * This method should not permit graph mutations.
+     *
+     * @param v1 one end of the edge
+     * @param v2 the other end of the edge
+     * @return the edge connecting v1 and v2
+     */
+    @Override
+    public E getEdge(V v1, V v2) {
+
+        Edge toGet=new Edge(v1,v2);
+        return toGet;
+    }
     //// add all new code above this line ////
 
     /**
@@ -77,4 +324,6 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
             remove(trim);
         }
     }
+
+
 }
