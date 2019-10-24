@@ -19,8 +19,12 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public boolean addVertex(V v) {
-        this.allVer.add(v);
-        return this.allVer.contains(v);
+        if( this.allVer.contains(v)){
+            return false;
+        }else {
+            return this.allVer.add(v);
+        }
+
     }
 
     /**
@@ -42,8 +46,11 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public boolean addEdge(E e) {
-        this.allEdg.add(e);
-        return this.allEdg.contains(e);
+        if( this.allEdg.contains(e)){
+            return false;
+        }else {
+            return this.allEdg.add(e);
+        }
     }
 
     /**
@@ -128,12 +135,16 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public boolean remove(V v) {
-        if (this.allVer.contains(v)){
-            this.allVer.remove(v);
-            return true;
-        }else {
-            return false;
+        this.allVer.remove(v);
+        Map<V,E> nei=new HashMap<>();
+        nei=getNeighbours(v);
+        for(Map.Entry<V,E>entry:nei.entrySet()){
+            this.allEdg.remove(getEdge(entry.getKey(),v));
         }
+        if(!this.allVer.contains(v)){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -144,7 +155,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public Set<V> allVertices() {
-        return this.allVer;
+        Set<V> alv=new HashSet<>(this.allVer);
+        return alv;
     }
 
     /**
@@ -156,7 +168,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public Set<E> allEdges(V v) {
-        return this.allEdg;
+        Set<E> vIn=new HashSet<>();
+        for(E edge: this.allEdg){
+            if(edge.v1().equals(v)||edge.v2().equals(v)){
+                vIn.add(edge);
+            }
+        }
+        return vIn;
     }
 
     /**
@@ -167,7 +185,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public Set<E> allEdges() {
-        return this.allEdg;
+        Set<E> ale=new HashSet<>(this.allEdg);
+        return ale;
     }
 
     /**
@@ -179,7 +198,16 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public Map<V, E> getNeighbours(V v) {
-        return null;
+        Map<V,E> nei=new HashMap<>();
+        for(E e:this.allEdg){
+            if(e.v1().equals(v)){
+                nei.put(e.v2(),e);
+            }
+            else if(e.v2().equals(v)){
+                nei.put(e.v1(),e);
+            }
+        }
+        return nei;
     }
 
     /**
@@ -191,7 +219,80 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public List<V> shortestPath(V source, V sink) {
-        return null;
+
+         if (source.equals(sink)){
+             return List.of(source);
+         }
+         // index reference
+        List<V> allVerReference= new ArrayList<>(this.allVer);
+        int[] dist= new int[allVerReference.size()];
+        //already selected
+
+        List<V> selectVer= new ArrayList<>();
+        List<V> visited=new ArrayList<>(this.allVer);
+        List<V> previous=new ArrayList<>(this.allVer.size());
+        for(V v: allVerReference){
+            if(!v.equals(source)){
+                dist[allVerReference.indexOf(v)]=Integer.MAX_VALUE;
+            }
+            previous.add(sink);
+
+        }
+        dist[allVerReference.indexOf(source)]=0;
+
+        V vertex=source;
+    visited.remove(source);
+        while (visited.size()>0){
+            Map<V,E> NeighborEdgeReference=getNeighbours(vertex);
+
+
+            for(Map.Entry<V,E> entry: NeighborEdgeReference.entrySet()){
+                if(dist[allVerReference.indexOf(vertex)]+entry.getValue().length()<dist[allVerReference.indexOf(entry.getKey())]){
+
+                    dist[allVerReference.indexOf(entry.getKey())]=dist[allVerReference.indexOf(vertex)]+entry.getValue().length();
+                    previous.set(allVerReference.indexOf((entry.getKey())),vertex);
+
+                }
+
+
+            }
+            V te=vertex;
+            int temp;
+            int min=Integer.MAX_VALUE;
+            for(V verNe: NeighborEdgeReference.keySet()){
+                temp=dist[allVerReference.indexOf(verNe)];
+                if(temp<min&&temp!=0&&visited.contains(verNe)){
+                    min=temp;
+                    vertex=verNe;
+                }
+            }
+            if(vertex.equals(te)){
+                break;
+            }
+            visited.remove(vertex);
+        }
+        if(!previous.get(allVerReference.indexOf(sink)).equals(sink)){
+        selectVer.add(sink);
+        V v=sink;
+        while(!selectVer.contains(source)){
+            V vne=previous.get(allVerReference.indexOf(v));
+            selectVer.add(vne);
+            v=vne;
+
+
+        }
+        List<V> result = new ArrayList<>(0);
+//        result.add(selectVer.get(selectVer.size() - 1));
+        for (int i = 1; i <= selectVer.size(); i++) {
+            result.add(selectVer.get(selectVer.size() - i));
+        }
+
+        return result;
+        }else {
+
+            return new ArrayList<>();
+        }
+
     }
 
     /**
@@ -202,7 +303,36 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public List<E> minimumSpanningTree() {
-        return null;
+        int min = Integer.MAX_VALUE;
+        Set<E> copy = new HashSet<>();
+        copy.addAll(this.allEdg);
+        List<E> tree = new ArrayList<>();
+        List<V> visited = new ArrayList<>();
+        E first = null;
+        if (this.allEdg.size() >= this.allVer.size() - 1) {
+            while (visited.size() != this.allVer.size() + 2) {
+                for (E e : copy) {
+                    if (e.length() <= min) {
+                        min = e.length();
+                        first = e;
+                    }
+                }
+                if (!visited.contains(first.v1()) || !visited.contains(first.v2())) {
+                    tree.add(first);
+                    if (!visited.contains(first.v1())) {
+                        visited.add(first.v1());
+                    }
+                    if (!visited.contains(first.v2())) {
+                        visited.add(first.v2());
+                    }
+                }
+                copy.remove(first);
+                min = Integer.MAX_VALUE;
+            }
+            return tree;
+        } else {
+            throw new IllegalArgumentException("some points are not connected");
+        }
     }
 
     /**
@@ -214,7 +344,23 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
 
     @Override
     public int pathLength(List<V> path) {
-        return 0;
+        int sum=0;
+        if(path.size()!=0) {
+            for (int i = 0; i < path.size() - 1; i++) {
+                int len = 0;
+                Edge<V> edg = new Edge<>(path.get(i), path.get(i + 1));
+                for (E edge : this.allEdg) {
+                    if (edge.equals(edg)) {
+                        len = edge.length();
+                        break;
+                    }
+                }
+                sum += len;
+            }
+            return sum;
+        }else {
+            return Integer.MAX_VALUE;
+        }
     }
 
     /**
@@ -226,7 +372,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public Set<V> search(V v, int range) {
-        return null;
+        Set<V> search=new HashSet<>();
+        for(V c:this.allVer){
+            if(pathLength(shortestPath(v,c))<=range&&!c.equals(v)){
+                search.add(c);
+            }
+        }
+        return search;
     }
 
     /**
@@ -241,7 +393,24 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public int diameter() {
-        return 0;
+        int max=0;
+        int length;
+        List<List<V>> path=new ArrayList<>();
+        for(V q: allVer){
+            for(V e:allVer) {
+                path.add(shortestPath(q,e));
+            }
+        }
+        for(List<V> c: path){
+            if(pathLength(c)==Integer.MAX_VALUE){
+                continue;
+            }
+            length=pathLength(c);
+            if(length>=max){
+                max=length;
+            }
+        }
+        return max;
     }
 
     /**
@@ -254,9 +423,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> implements ImGraph<V, E>
      */
     @Override
     public E getEdge(V v1, V v2) {
-
-        Edge toGet=new Edge(v1,v2);
-        return toGet;
+        Edge<V> ed=new Edge<>(v1,v2);
+        for(E edge: this.allEdg){
+            if(edge.equals(ed)){
+                return edge;
+            }
+        }
+        throw new IllegalArgumentException("Edge is not in this graph");
     }
     //// add all new code above this line ////
 

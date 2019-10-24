@@ -17,12 +17,30 @@ import java.util.NoSuchElementException;
 /**
  * An instance implements the methods needed to complete the mission.
  */
-public class MillenniumFalcon implements Spaceship {
+public class MillenniumFalcon implements Spaceship  {
     long startTime = System.nanoTime(); // start time of rescue phase
 
     @Override
     public void hunt(HunterStage state) {
-        // TODO: Implement this method
+
+        while(!state.onKamino()){
+            int id=state.currentID();
+            PlanetStatus[] nei=state.neighbors();
+            double max=0;
+            PlanetStatus nextPlanet = null;
+            for(int i=0; i<nei.length;i++){
+                double temp=nei[i].signal();
+                if(temp>=max){
+                    max=temp;
+                    nextPlanet=nei[i];
+                }
+            }
+
+            state.moveTo(nextPlanet.id());
+
+
+        }
+
     }
 
     @Override
